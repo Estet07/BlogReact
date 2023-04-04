@@ -1,25 +1,74 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Post from '../Post/Post'
 import styles from'./posts.module.css'
+import axios from "axios";
 
+const getPosts = () => {
+  return axios.get('http://localhost:3001/posts')
+}
 
+const createPost = (newPost) => {
+  return axios.post('http://localhost:3001/posts', newPost)
+} 
 
+const editPost = (url, published) => {
+  return axios.patch(url, published)
+}
+
+const deletedPost = (id) => {
+  return axios.delete(`http://localhost:3001/posts/${id}`)
+} 
 
 const Posts = (props) => {
-  // const { posts } = props;
-  const [posts, setPosts] = useState(props.posts)
+  const [posts, setPosts] = useState([])
   const [newPost, setNewPost] = useState('')
+  const [showAll, setShowAll] = useState(false)
+
+  useEffect(() => {
+    getPosts()
+    .then(res => 
+      setPosts(res.data))
+  }, [])
+
 
   const addPost = (event) => {
     event.preventDefault()
     const postObject = {
-      id: posts.length + 1,
       title: newPost,
       published: Math.random() > 0.5
     }
-    setPosts(posts.concat(postObject))
+    createPost(postObject)
+      .then(res => setPosts(posts.concat(res.data)))
+    
     setNewPost('')
   }
+
+  const togglePublished = (id, published) => {
+    const url = `http://localhost:3001/posts/${id}`
+    const editInfo = {
+      "published" : !published
+    }
+    console.log(posts, id)
+    editPost(url, editInfo)
+    .then(res => {
+      setPosts(posts.map(post => post.id === id ? res.data : post))
+    })
+    .catch(err => console.log(err))
+  }
+  
+  const deletePost = (id) => {
+      deletedPost(id)
+      .then(res => {
+        setPosts(posts.filter(post => post.id !== id))
+      console.log(posts)
+      })
+     .catch (err => console.log(err)) 
+  } 
+
+
+  const postsToShow = showAll 
+  ? posts 
+  : posts.filter(post => post.published) 
 
   // const handlePostChange = event => { setNewPost(event.target.value)}  то что пользователь вводи в input
   //   console.log(event.target.value)
@@ -28,10 +77,19 @@ const Posts = (props) => {
   
   return (
     <div>
-
-      {posts.map((post) => {
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          Показать {showAll ? 'опубликованные' : 'все'}
+        </button>
+      </div>
+      {postsToShow.map((post) => {
         return (
-          <Post key={post.id} post={post}/>
+          <Post 
+            key={post.id} 
+            post={post}
+            togglePublished={togglePublished}
+            deletePost={deletePost}
+          />
         );
       })}
       <form className={styles.posts_form} onSubmit={addPost}>

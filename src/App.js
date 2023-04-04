@@ -4,29 +4,13 @@ import Header from "./components/Header/Header";
 import Posts from "./components/Posts/Posts";
 import Post from "./components/Post/Post";
 
-function App() {
-  const posts = [
-    {
-      id: 1,
-      title: "My first post",
-      published: true
-    },
-    {
-      id: 2,
-      title: "My second post",
-      published: false
-    },
-    {
-      id: 3,
-      title: "My third post",
-      published: true
-    }
-  ]
 
+
+function App() {
   return (
     <div className="App">
       <Header />
-        <Posts posts={posts}/>
+        <Posts />
       <Footer />
     </div>
   );
