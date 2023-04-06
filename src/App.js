@@ -2,15 +2,15 @@ import "./App.css";
 import Footer from "./components/Footer/Footer";
 import Header from "./components/Header/Header";
 import Posts from "./components/Posts/Posts";
-import Post from "./components/Post/Post";
-
-
+import { Route, Routes } from "react-router-dom";
 
 function App() {
   return (
     <div className="App">
       <Header />
-        <Posts />
+        <Routes>
+          <Route path='/posts' element={<Posts />} />
+        </Routes>
       <Footer />
     </div>
   );

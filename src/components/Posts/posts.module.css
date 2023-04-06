@@ -1,4 +1,13 @@
+.wrapper-grid {
+    display: flex;
+    flex-wrap: wrap;
+}
 
+.wrapper-list {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column; 
+}
 
 .posts_submit {
     margin-left: 10px;

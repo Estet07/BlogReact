@@ -1,31 +1,21 @@
 import React, { useState, useEffect } from "react";
 import Post from '../Post/Post'
 import styles from'./posts.module.css'
-import axios from "axios";
+import postServices from "../../services/posts";
 
-const getPosts = () => {
-  return axios.get('http://localhost:3001/posts')
-}
-
-const createPost = (newPost) => {
-  return axios.post('http://localhost:3001/posts', newPost)
-} 
-
-const editPost = (url, published) => {
-  return axios.patch(url, published)
-}
-
-const deletedPost = (id) => {
-  return axios.delete(`http://localhost:3001/posts/${id}`)
-} 
 
 const Posts = (props) => {
   const [posts, setPosts] = useState([])
   const [newPost, setNewPost] = useState('')
   const [showAll, setShowAll] = useState(false)
+  const [wrapper, setWrapper] = useState("wrapper-grid")
+  const [postStyle, setPostStyle] = useState("post")
+
+  console.log(postServices);
 
   useEffect(() => {
-    getPosts()
+    postServices 
+    .get()
     .then(res => 
       setPosts(res.data))
   }, [])
@@ -37,19 +27,19 @@ const Posts = (props) => {
       title: newPost,
       published: Math.random() > 0.5
     }
-    createPost(postObject)
+    postServices
+    .create(postObject)
       .then(res => setPosts(posts.concat(res.data)))
     
     setNewPost('')
   }
 
   const togglePublished = (id, published) => {
-    const url = `http://localhost:3001/posts/${id}`
     const editInfo = {
       "published" : !published
     }
-    console.log(posts, id)
-    editPost(url, editInfo)
+    postServices
+    .edit(id, editInfo)
     .then(res => {
       setPosts(posts.map(post => post.id === id ? res.data : post))
     })
@@ -57,10 +47,10 @@ const Posts = (props) => {
   }
   
   const deletePost = (id) => {
-      deletedPost(id)
+    postServices
+      .delete(id)
       .then(res => {
         setPosts(posts.filter(post => post.id !== id))
-      console.log(posts)
       })
      .catch (err => console.log(err)) 
   } 
@@ -78,20 +68,36 @@ const Posts = (props) => {
   return (
     <div>
       <div>
+        <button onClick={() => (setWrapper("wrapper-grid"), setPostStyle(""))}>
+          Список
+        </button>
+        <button onClick={() => (setWrapper("wrapper-list"), setPostStyle("post"))}>
+          Сетка 
+        </button>
+        <button onClick={() => (setPostStyle("post-list2"), setWrapper("wrapper-grid"))}>
+          Сетка 2
+        </button>
+        <button onClick={() => (setPostStyle("post-list3"), setWrapper("wrapper-grid"))}>
+          Сетка 3
+        </button>
         <button onClick={() => setShowAll(!showAll)}>
           Показать {showAll ? 'опубликованные' : 'все'}
         </button>
       </div>
-      {postsToShow.map((post) => {
-        return (
-          <Post 
-            key={post.id} 
-            post={post}
-            togglePublished={togglePublished}
-            deletePost={deletePost}
-          />
-        );
-      })}
+      <div className={styles[wrapper]}>
+        {postsToShow.map((post) => {
+          return (
+            <Post 
+              key={post.id} 
+              post={post}
+              togglePublished={togglePublished}
+              deletePost={deletePost}
+              style={postStyle}
+            />
+          );
+        })}
+      </div>
+      
       <form className={styles.posts_form} onSubmit={addPost}>
         <input 
           type="text" 
